@@ -1,5 +1,5 @@
 # Chat System Microservice
-*Assupmtions:*<br>
+*Assumptions:*<br>
 - Usernames are unique.
 - Data fetching pattern is described similar to popular apps, such as Whatsapp, FB Messenger, Telegram, etc...
 Where users once login can see a list of all messages sent to them or by them sorted by time in which they are sent in a DESC manner.
@@ -42,6 +42,10 @@ Run the following command in CLI pointing to the project root. So, you can get y
     ```
     <br>In case you encounter a db dirty state, just connect to Cassandra via any client to drop/remove all tables including the schema_migrations table under the chat keyspace.
 
+    <br>I believe you know how to clear all db entries and drop the schema all at once:
+    ```bash
+    $ migrate -path internal/db/migrations -database cassandra://cassandra:cassandra@localhost:9042/chat down
+    ```
     <br>
     SQLTools VSCode extension by `Matheus Teixeira` is a good one for GUI experience.
 
@@ -60,6 +64,11 @@ You can utilize the included POSTMAN file with docs and environment setup to imp
 ## License
 This is a free software distributed under the terms of the WTFPL license along with MIT license as dual-licensed, You can choose whatever works for you.<br/><br/>
 Review the attached License file within the source code for mor details.
+
+## TODOS
+Here's a list of bunch of stuff to be done when time allows!
+- Integrate Prometheus & Grafana for metrics & monitoring.
+- Test Coverage. Because we need to unsure reliability :(
 
 ## Wanna Contribute?
 Shout out!
