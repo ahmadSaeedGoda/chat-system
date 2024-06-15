@@ -1,0 +1,55 @@
+# Exclude version control files
+.git
+.gitignore
+
+# Exclude unnecessary development and testing files
+*_test.go
+
+# Exclude all environment files
+*.env
+.env.*
+
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+tmp/
+
+# Output files
+*.out
+*.out.*
+*.test
+
+# IDE files
+.idea/
+.vscode/
+
+# Compiled Go code
+*.test
+*.prof
+*.exe
+*.out
+/_test/
+
+# Dependency directories
+/vendor/
+
+# Build artifacts
+/build/
+
+# Docker artifacts
+.DS_Store
+docker-compose.*
+Dockerfile
+Dockerfile.*
+.dockerignore
+.dockerignore.example
+
+# Logs
+*.log
+
+# MISC
+LICENSE
+README.md

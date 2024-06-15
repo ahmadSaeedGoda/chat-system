@@ -1,0 +1,41 @@
+# Exclude all environment files
+.env
+*.env
+.env.*
+!.env.example
+!.env.*.example
+
+
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+tmp/
+
+# Output files
+*.out
+*.out.*
+*.test
+
+# Compiled Go code
+*.test
+*.prof
+*.exe
+*.out
+/_test/
+
+# Dependency directories
+/vendor/
+/go.sum
+
+# Generated files
+/swagger/
+/internal/routers/docs/
+
+# Build artifacts
+/build/
+
+# Logs
+*.log
