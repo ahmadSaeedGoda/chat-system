@@ -1,5 +1,5 @@
 # Chat System Microservice
-*Assumptions:*<br>
+*Assumptions:*
 - Usernames are unique.
 - Data fetching pattern is described similar to popular apps, such as Whatsapp, FB Messenger, Telegram, etc...
 Where users once login can see a list of all messages sent to them or by them sorted by time in which they are sent in a DESC manner.
@@ -44,13 +44,25 @@ Set your own for security measures and best practices.
 
 ### Steps
 1. Clone the repository.
-2. Build:
+2. Set the Environment Variables. Find the file named `.env.example` in the root directory of the project. Duplicate the file in the same path/location, rename the new one `.env` then set the values of the environment variables listed within the file according to your environment respectively.
+
+    <br>Well, you may wanna keep `CASSANDRA_NODES` && `AUTH_HEADER_PREFIX` vars as-is with current values if you do wanna use the provided `docker-compose.yaml` file and `POSTMAN` collection & env without creating your own!
+
+    Now you should be good to go.
+
+    Unless you'd like to play a bit with `.air.toml` configurations. Consult the [Air's documentation]([URL](https://github.com/air-verse/air)) for more details/instructions in this regard.
+
+3. Build:
     ```bash
     $ docker compose up --build
     ```
-3. Ensure all services are up & healthy first.
-4. Migrate the DataStore:<br>
-Run the following command in CLI pointing to the project root. So, you can get your database schema created:
+4. Ensure all services are up & healthy first.
+5. Migrate the DataStore:<br>
+    Install [golang-migrate/migrate CLI package]([URL](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate)) to use.<br>
+    Better with instructions for the respective OS you have as opposed to the "With Go toolchain" instructions on that page.<br>
+    Additionally, [Docker usage]([URL](https://github.com/golang-migrate/migrate/?tab=readme-ov-file#docker-usage)) can be a breeze!
+
+    Run the following command in CLI pointing to the project root. So, you can get your database schema created:<br>
     ```bash
     $ migrate -path internal/db/migrations -database cassandra://cassandra:cassandra@localhost:9042/chat up
     ```
@@ -60,14 +72,16 @@ Run the following command in CLI pointing to the project root. So, you can get y
     ```bash
     $ migrate -path internal/db/migrations -database cassandra://cassandra:cassandra@localhost:9042/chat down
     ```
-    <br>
+    Visiting [migrate's docs]([URL](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate#usage)) is both helpful & recommended as usual.<br>
+
     <b>SQLTools</b> vsCode extension by <b>Matheus Teixeira</b> is a good one for GUI experience.
 
-5. Access the service at `http://localhost/api/v1/<path>`.<br>
-You can utilize the included `POSTMAN` file with docs and environment setup to import at your end for convenience. "Find them at the root directory of the project in `json` format"
+6. Access the service at `http://localhost/api/v1/<path>`.<br>
+    You can utilize the included `POSTMAN` file with docs and environment setup to import at your end for convenience. "Find them at the root directory of the project in `json` format"
 
-    Remember to register & login to grab the `token` and set its value in the Auth headers of subsequent requests to protected endpoints.
-6. For Redis GUI client you can use `Redis Insight` as a good tool, works well on Linux/Ubuntu. Find your as per your respective platform though!<br> Or get savvy & jump right into the CLI mystical world!!
+    Remember to register & login to grab the `token` and set its value in the Auth headers of subsequent requests to protected endpoints.<br>
+
+7. For Redis GUI client you can use `Redis Insight` as a good tool, works well on Linux/Ubuntu. Find your as per your respective platform though!<br> Or get savvy & jump right into the CLI mystical world!!
 
 ## API Endpoints
 - `POST /register` - Register a new user
