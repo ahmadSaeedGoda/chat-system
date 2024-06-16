@@ -28,7 +28,6 @@ tmp/
 
 # Dependency directories
 /vendor/
-/go.sum
 
 # Generated files
 /swagger/
