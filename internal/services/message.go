@@ -21,26 +21,29 @@ func (s *MessageService) CreateMessage(message *models.Message) error {
 	message.ID = gocql.TimeUUID()
 	message.Timestamp = time.Now()
 
-	queryRecipient := `INSERT INTO chat.messages_by_recipient (recipient, id, sender, timestamp, content) VALUES (?, ?, ?, ?, ?)`
-	querySender := `INSERT INTO chat.messages_by_sender (sender, id, recipient, timestamp, content) VALUES (?, ?, ?, ?, ?)`
-
+	query := `INSERT INTO chat.messages
+		(user, timestamp, id, sender, recipient, content)
+		VALUES (?, ?, ?, ?, ?, ?)
+	`
 	batch := db.Session.NewBatch(gocql.LoggedBatch)
 
 	batch.Query(
-		queryRecipient,
-		message.Recipient,
-		message.ID,
+		query,
 		message.Sender,
 		message.Timestamp,
+		message.ID,
+		message.Sender,
+		message.Recipient,
 		message.Content,
 	)
 
 	batch.Query(
-		querySender,
-		message.Sender,
-		message.ID,
+		query,
 		message.Recipient,
 		message.Timestamp,
+		message.ID,
+		message.Sender,
+		message.Recipient,
 		message.Content,
 	)
 
@@ -49,7 +52,13 @@ func (s *MessageService) CreateMessage(message *models.Message) error {
 
 func (s *MessageService) GetMessages(username string) ([]models.Message, error) {
 	var messages []models.Message
-	iter := db.Session.Query(`SELECT id, sender, recipient, timestamp, content FROM messages WHERE recipient = ?`, username).Iter()
+	iter := db.Session.Query(
+		`SELECT id, sender, recipient, timestamp, content
+		FROM chat.messages
+		WHERE user = ?
+		ORDER BY timestamp DESC`,
+		username,
+	).Iter()
 	var message models.Message
 	for iter.Scan(&message.ID, &message.Sender, &message.Recipient, &message.Timestamp, &message.Content) {
 		messages = append(messages, message)
@@ -92,62 +101,4 @@ func (s *MessageService) SetMessagesToCache(cacheKey string, messages []models.M
 	}
 
 	return nil
-}
-
-func (s *MessageService) GetFromDB(username string, page, pageSize int) ([]models.Message, error) {
-	var (
-		messages                   []models.Message
-		id                         gocql.UUID
-		sender, recipient, content string
-		timestamp                  time.Time
-	)
-
-	seenMessages := make(map[gocql.UUID]bool)
-
-	// Fetch messages where the user is the recipient
-	queryRecipient := `SELECT recipient, id, sender, timestamp, content FROM chat.messages_by_recipient WHERE recipient = ?`
-	iterRecipient := db.Session.Query(queryRecipient, username).Iter()
-
-	for iterRecipient.Scan(&recipient, &id, &sender, &timestamp, &content) {
-		if !seenMessages[id] {
-			messages = append(
-				messages,
-				models.Message{
-					ID:        id,
-					Sender:    sender,
-					Recipient: recipient,
-					Timestamp: timestamp,
-					Content:   content,
-				},
-			)
-			seenMessages[id] = true
-		}
-	}
-	if err := iterRecipient.Close(); err != nil {
-		return nil, err
-	}
-
-	// Fetch messages where the user is the sender
-	querySender := `SELECT sender, id, recipient, timestamp, content FROM chat.messages_by_sender WHERE sender = ?`
-	iterSender := db.Session.Query(querySender, username).Iter()
-
-	for iterSender.Scan(&sender, &id, &recipient, &timestamp, &content) {
-		if !seenMessages[id] {
-			messages = append(
-				messages, models.Message{
-					ID:        id,
-					Sender:    sender,
-					Recipient: recipient,
-					Timestamp: timestamp,
-					Content:   content,
-				},
-			)
-			seenMessages[id] = true
-		}
-	}
-	if err := iterSender.Close(); err != nil {
-		return nil, err
-	}
-
-	return messages, nil
 }

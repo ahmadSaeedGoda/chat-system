@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"sort"
 )
 
 const CACHE_KEY_SUFFIX = "-messages"
@@ -67,6 +66,7 @@ func SendMessage(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(msg)
 }
 
+// GetMessages retrieves all messages for the authenticated user
 func GetMessages(w http.ResponseWriter, r *http.Request) {
 	var (
 		messages       []models.Message
@@ -85,7 +85,7 @@ func GetMessages(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if messages == nil {
-		messages, err = msgService.GetFromDB(username, page, pageSize)
+		messages, err = msgService.GetMessages(username)
 		if err != nil {
 			panic(err)
 		}
@@ -95,11 +95,6 @@ func GetMessages(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		}
 	}
-
-	// Sort messages by timestamp in descending order
-	sort.Slice(messages, func(i, j int) bool {
-		return messages[i].Timestamp.After(messages[j].Timestamp)
-	})
 
 	res := paginateMessages(page, pageSize, messages)
 
@@ -113,10 +108,17 @@ func GetMessages(w http.ResponseWriter, r *http.Request) {
 // TODO:: Can be more generic to paginate any entity
 // paginateMessages paginates the messages
 func paginateMessages(page, pageSize int, messages []models.Message) map[string]interface{} {
+	itemsCount := len(messages)
+
 	startIndex := (page - 1) * pageSize
+
+	if startIndex > itemsCount {
+		startIndex = itemsCount
+	}
+
 	endIndex := page * pageSize
-	if endIndex > len(messages) {
-		endIndex = len(messages)
+	if endIndex > itemsCount {
+		endIndex = itemsCount
 	}
 
 	paginatedMessages := messages[startIndex:endIndex]
@@ -126,8 +128,8 @@ func paginateMessages(page, pageSize int, messages []models.Message) map[string]
 		"pagination": map[string]interface{}{
 			"currentPage":   page,
 			"pageSize":      pageSize,
-			"totalMessages": len(messages),
-			"totalPages":    (len(messages) + pageSize - 1) / pageSize,
+			"totalMessages": itemsCount,
+			"totalPages":    (itemsCount + pageSize - 1) / pageSize,
 		},
 	}
 
