@@ -6,6 +6,7 @@
     "joho",
     "Keyspace",
     "softbrewery",
+    "stretchr",
     "Subrouter"
   ],
   "sqltools.connections": [

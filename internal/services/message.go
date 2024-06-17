@@ -11,13 +11,20 @@ import (
 	"github.com/gocql/gocql"
 )
 
-type MessageService struct{}
-
-func NewMessageService() *MessageService {
-	return &MessageService{}
+type MessageService interface {
+	CreateMessage(message *models.Message) error
+	GetMessages(username string) ([]models.Message, error)
+	GetFromCache(cacheKey string) ([]models.Message, error)
+	SetMessagesToCache(cacheKey string, messages []models.Message) error
 }
 
-func (s *MessageService) CreateMessage(message *models.Message) error {
+type messageService struct{}
+
+func NewMessageService() *messageService {
+	return &messageService{}
+}
+
+func (s *messageService) CreateMessage(message *models.Message) error {
 	message.ID = gocql.TimeUUID()
 	message.Timestamp = time.Now()
 
@@ -50,7 +57,7 @@ func (s *MessageService) CreateMessage(message *models.Message) error {
 	return db.Session.ExecuteBatch(batch)
 }
 
-func (s *MessageService) GetMessages(username string) ([]models.Message, error) {
+func (s *messageService) GetMessages(username string) ([]models.Message, error) {
 	var messages []models.Message
 	iter := db.Session.Query(
 		`SELECT id, sender, recipient, timestamp, content
@@ -70,7 +77,7 @@ func (s *MessageService) GetMessages(username string) ([]models.Message, error) 
 	return messages, nil
 }
 
-func (s *MessageService) GetFromCache(cacheKey string) ([]models.Message, error) {
+func (s *messageService) GetFromCache(cacheKey string) ([]models.Message, error) {
 	jsonData, err := cache.Get(cacheKey)
 	if err == redis.Nil {
 		return nil, nil
@@ -89,7 +96,7 @@ func (s *MessageService) GetFromCache(cacheKey string) ([]models.Message, error)
 	return messages, nil
 }
 
-func (s *MessageService) SetMessagesToCache(cacheKey string, messages []models.Message) error {
+func (s *messageService) SetMessagesToCache(cacheKey string, messages []models.Message) error {
 	jsonData, err := json.Marshal(messages)
 	if err != nil {
 		return err

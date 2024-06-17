@@ -9,13 +9,19 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type UserService struct{}
-
-func NewUserService() *UserService {
-	return &UserService{}
+type UserService interface {
+	UserExists(username string) (bool, error)
+	CreateUser(userInput *models.RegisterInput) (*models.User, error)
+	GetUserByCreds(credentials models.LoginInput) (*models.User, error)
 }
 
-func (s *UserService) GetUserByCreds(credentials models.LoginInput) (*models.User, error) {
+type userService struct{}
+
+func NewUserService() *userService {
+	return &userService{}
+}
+
+func (s *userService) GetUserByCreds(credentials models.LoginInput) (*models.User, error) {
 	var existingUser models.User
 	err := db.Session.Query(`SELECT id, username, password FROM users WHERE username = ? LIMIT 1`, credentials.Username).
 		Scan(&existingUser.ID, &existingUser.Username, &existingUser.Password)
@@ -31,7 +37,7 @@ func (s *UserService) GetUserByCreds(credentials models.LoginInput) (*models.Use
 	return &existingUser, err
 }
 
-func (s *UserService) UserExists(username string) (bool, error) {
+func (s *userService) UserExists(username string) (bool, error) {
 	var existingUserId gocql.UUID
 	err := db.Session.Query(`SELECT id FROM users WHERE username = ? LIMIT 1`, username).Scan(&existingUserId)
 
@@ -46,7 +52,7 @@ func (s *UserService) UserExists(username string) (bool, error) {
 	return false, err
 }
 
-func (s *UserService) CreateUser(userInput *models.RegisterInput) (*models.User, error) {
+func (s *userService) CreateUser(userInput *models.RegisterInput) (*models.User, error) {
 	hashedPassword, err := s.hashPassword(userInput.Password)
 	if err != nil {
 		return nil, err
@@ -66,12 +72,12 @@ func (s *UserService) CreateUser(userInput *models.RegisterInput) (*models.User,
 	return user, err
 }
 
-func (s *UserService) hashPassword(password string) (string, error) {
+func (s *userService) hashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(bytes), err
 }
 
-func (s *UserService) checkPasswordHash(password, hash string) bool {
+func (s *userService) checkPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }
