@@ -16,6 +16,11 @@ import (
 
 var userService = services.NewUserService()
 
+type AuthHandler interface {
+	Register(w http.ResponseWriter, r *http.Request)
+	Login(w http.ResponseWriter, r *http.Request)
+}
+
 func Register(w http.ResponseWriter, r *http.Request) {
 	var input models.RegisterInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
