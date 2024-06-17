@@ -32,7 +32,7 @@ Set your own for security measures and best practices.
 - Other environment parameters can be set & used across the app for more robust experience. Such as `DEBUG` & `APP_ENV` flags e.g
 
 - Logging is subject for enhancement.
-- Lack of Testing due to tight deadline in a holiday season.
+- Lack of Integration-Testing/E2E tests to verify API functionality. Due to tight deadline in a holiday season.
 - Simple input validation is conducted for the purpose of the demo. Rigorous validation with nicer error handling can be something to consider.
 - No Rate Limiting.
 
@@ -83,6 +83,12 @@ Set your own for security measures and best practices.
 
 7. For Redis GUI client you can use `Redis Insight` as a good tool, works well on Linux/Ubuntu. Find your as per your respective platform though!<br> Or get savvy & jump right into the CLI mystical world!!
 
+## How to Test
+You can use the IDE comfy testing tools. Or visit the project-root directory from CLI and run:
+```bash
+$ go test ./... -v
+```
+
 ## API Endpoints
 - `POST /register` - Register a new user
 - `POST /login` - Login a user
@@ -96,7 +102,7 @@ Review the attached License file within the source code for mor details.
 ## TODOS
 Here's a list of bunch of stuff to be done when time allows!
 - Integrate Prometheus & Grafana for metrics & monitoring.
-- Test Coverage. Because we need to unsure reliability :(
+- Write integrations test cases to ensure tests cover user registration, login, message sending, and message retrieval.
 
 ## Wanna Contribute?
 Shout out!
