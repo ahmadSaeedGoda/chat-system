@@ -1,23 +1,15 @@
-package db
+package cassandra
 
 import (
 	"fmt"
 	"log"
-	"os"
-	"strings"
 
 	"github.com/gocql/gocql"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
-
-const KEYSPACE = "chat"
 
 var Session *gocql.Session
 
-func Init() {
-	cassandraNodes := os.Getenv("CASSANDRA_NODES")
-	clusterAddresses := strings.Split(cassandraNodes, ",")
-
+func Init(keyspace string, replicaCount int, clusterAddresses ...string) (*gocql.Session, error) {
 	var (
 		err           error
 		clusterConfig *gocql.ClusterConfig
@@ -26,21 +18,28 @@ func Init() {
 	clusterConfig, Session, err = connectToCassandra(clusterAddresses...)
 
 	if err != nil {
-		log.Fatalf("Failed to connect to Cassandra: %v", err)
+		log.Printf("Failed to connect to Cassandra: %v", err)
+		return nil, err
 	}
 
 	log.Println("Connected to Cassandra")
 
-	createKeyspace(len(clusterAddresses))
-
-	// Reconnect to the keyspace
-	clusterConfig.Keyspace = "chat"
-	Session, err = clusterConfig.CreateSession()
+	err = createKeyspace(replicaCount, keyspace)
 	if err != nil {
-		log.Fatalf("Failed to connect to keyspace: %v", err)
+		log.Printf("Failed to create keyspace '%s' : %v", keyspace, err)
+		return nil, err
 	}
 
-	log.Printf("Successfully connected to '%s' keyspace. Now you may want to run migrations!", KEYSPACE)
+	// Reconnect to the keyspace
+	clusterConfig.Keyspace = keyspace
+	Session, err = clusterConfig.CreateSession()
+	if err != nil {
+		log.Printf("Failed to connect to keyspace '%s': %v", keyspace, err)
+		return nil, err
+	}
+
+	log.Printf("Successfully connected to '%s' keyspace. Now you may want to run migrations!", keyspace)
+	return Session, nil
 }
 
 func connectToCassandra(clusterAddresses ...string) (*gocql.ClusterConfig, *gocql.Session, error) {
@@ -53,15 +52,17 @@ func connectToCassandra(clusterAddresses ...string) (*gocql.ClusterConfig, *gocq
 	return clusterConfig, session, nil
 }
 
-func createKeyspace(replicaCount int) {
+func createKeyspace(replicaCount int, keyspace string) error {
 	createKeyspaceQuery := fmt.Sprintf(`
 		CREATE KEYSPACE IF NOT EXISTS %s WITH replication = {
 			'class': 'SimpleStrategy',
 			'replication_factor': '%d'
-		}`, KEYSPACE, replicaCount)
+		}`, keyspace, replicaCount)
 
 	if err := Session.Query(createKeyspaceQuery).Exec(); err != nil {
-		log.Fatalf("failed to create keyspace: %v", err)
+		log.Printf("failed to create keyspace '%s': %v", keyspace, err)
+		return err
 	}
-	fmt.Printf("Keyspace '%s' created\n", KEYSPACE)
+	fmt.Printf("Keyspace '%s' created\n", keyspace)
+	return nil
 }

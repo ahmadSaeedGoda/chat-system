@@ -6,6 +6,7 @@ import (
 	"chat-system/internal/api/middlewares"
 	"chat-system/internal/api/transformers"
 	"chat-system/internal/api/validators"
+	dbmanager "chat-system/internal/db_manager"
 	"chat-system/internal/models"
 	"chat-system/internal/services"
 	"encoding/json"
@@ -14,7 +15,7 @@ import (
 	"net/http"
 )
 
-var userService = services.NewUserService()
+var userService = services.NewUserService(dbmanager.CassandraSession, dbmanager.CASSANDRA_KEYSPACE, "users")
 
 type AuthHandler interface {
 	Register(w http.ResponseWriter, r *http.Request)

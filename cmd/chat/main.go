@@ -3,7 +3,7 @@ package main
 import (
 	"chat-system/internal/api/cache"
 	"chat-system/internal/api/routes"
-	"chat-system/internal/db"
+	dbmanager "chat-system/internal/db_manager"
 	"log"
 	"net/http"
 	"os"
@@ -14,8 +14,8 @@ import (
 func main() {
 	loadEnv()
 
-	db.Init()
-	defer db.Session.Close()
+	csSession := dbmanager.InitDB()
+	defer csSession.Close()
 
 	cache.Init()
 

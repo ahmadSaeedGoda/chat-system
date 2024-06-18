@@ -28,6 +28,7 @@ type Message struct {
 	Recipient string     `json:"recipient"`
 	Timestamp time.Time  `json:"timestamp"`
 	Content   string     `json:"content" validate:"required,min=1,max=1000"`
+	User      string     `json:"-"`
 }
 
 type SendMessageInput struct {

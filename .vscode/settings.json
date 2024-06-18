@@ -1,13 +1,19 @@
 {
   "cSpell.words": [
+    "ADDRS",
+    "consts",
+    "dbmanager",
     "gocql",
     "godotenv",
     "gojoi",
     "joho",
     "Keyspace",
+    "Nowf",
     "softbrewery",
     "stretchr",
-    "Subrouter"
+    "Subrouter",
+    "testflag",
+    "TODOS"
   ],
   "sqltools.connections": [
     {

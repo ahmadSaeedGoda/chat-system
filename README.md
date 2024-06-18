@@ -84,10 +84,35 @@ Set your own for security measures and best practices.
 7. For Redis GUI client you can use `Redis Insight` as a good tool, works well on Linux/Ubuntu. Find your as per your respective platform though!<br> Or get savvy & jump right into the CLI mystical world!!
 
 ## How to Test
-You can use the IDE comfy testing tools. Or visit the project-root directory from CLI and run:
+First ensure Cassandra DB server is up & running on your localhost.
+Or somewhere else but in this case you will need to adjust the tests cluster addresses manually in the code. Refer to `internal/services/test_utils.go` for some constants like `CLUSTER_ADDRS`.
+
+#### Via IDE Comfy tools For GUI Folks
+You can use the IDE comfy testing tools. However, please make sure to adjust the IDE settings for `Go: Test Timeout` to be set for something like `300s` which is equivalent to 5 minutes in such case. So, you allow it to take its time to establish a connection to cassandra DB and do all required jobs for test suites such as creating tables, seeding data, etc.
+<br><br>
+If you're on VSCode, adjusting timeout flag can be found as follows:
+- File menu > Preferences > Settings. (Or hit CTRL + Comma keys on keyboard if you're on Linux)
+- Search for `timeout`.<br>
+If you've Go extension `Go Team at Google` `~v0.41.4` installed, then you should be able to locate that setting.
+- Find that one setting under Extensions > Go.
+- Set the value to nearly 300 seconds or more. As Cassandra connection seems very expensive operation.
+
+#### Via CLI For Tech-Savvy
+Visit the project-root directory from CLI and run:
 ```bash
 $ go test ./... -v
 ```
+For displaying of every single tiny log to stdout and stay on top of your game and be in control to check what went well and what goes wrong.
+<br><br>
+Run:
+```sh
+$ go test ./...
+```
+For no verbosity. If you're only interested in finding what passed and what failed.
+<br>
+Set/Pass some flags like `-timeout`to control tests timeout "defaults to 10 minutes". And `-run` to only run a particular test.
+
+Head to `go help test` && `go help testflag` utilities docs for more detailed tips and hints on testing go modules. Good luck then!
 
 ## API Endpoints
 - `POST /register` - Register a new user
@@ -96,8 +121,8 @@ $ go test ./... -v
 - `GET /messages` - Retrieve message history
 
 ## License
-This is a free software distributed under the terms of the WTFPL license along with MIT license as dual-licensed, You can choose whatever works for you.<br/><br/>
-Review the attached License file within the source code for mor details.
+This is a free software distributed under the terms of the `WTFPL` license along with MIT license as dual-licensed, You can choose whatever works for you.<br/><br/>
+Review the attached `License` file within the source code for mor details.
 
 ## TODOS
 Here's a list of bunch of stuff to be done when time allows!

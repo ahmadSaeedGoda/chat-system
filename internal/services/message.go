@@ -2,9 +2,10 @@ package services
 
 import (
 	"chat-system/internal/api/cache"
-	"chat-system/internal/db"
+	"chat-system/internal/cassandra"
 	"chat-system/internal/models"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -18,21 +19,33 @@ type MessageService interface {
 	SetMessagesToCache(cacheKey string, messages []models.Message) error
 }
 
-type messageService struct{}
+type messageService struct {
+	db         *gocql.Session
+	dbKeyspace string
+	tableName  string
+}
 
-func NewMessageService() *messageService {
-	return &messageService{}
+func NewMessageService(db *gocql.Session, keyspace, tableName string) *messageService {
+	return &messageService{
+		db:         db,
+		dbKeyspace: keyspace,
+		tableName:  tableName,
+	}
 }
 
 func (s *messageService) CreateMessage(message *models.Message) error {
 	message.ID = gocql.TimeUUID()
 	message.Timestamp = time.Now()
 
-	query := `INSERT INTO chat.messages
+	query := fmt.Sprintf(
+		`INSERT INTO %s.%s
 		(user, timestamp, id, sender, recipient, content)
-		VALUES (?, ?, ?, ?, ?, ?)
-	`
-	batch := db.Session.NewBatch(gocql.LoggedBatch)
+		VALUES (?, ?, ?, ?, ?, ?)`,
+		s.dbKeyspace,
+		s.tableName,
+	)
+
+	batch := s.db.NewBatch(gocql.LoggedBatch)
 
 	batch.Query(
 		query,
@@ -54,16 +67,21 @@ func (s *messageService) CreateMessage(message *models.Message) error {
 		message.Content,
 	)
 
-	return db.Session.ExecuteBatch(batch)
+	return cassandra.Session.ExecuteBatch(batch)
 }
 
 func (s *messageService) GetMessages(username string) ([]models.Message, error) {
 	var messages []models.Message
-	iter := db.Session.Query(
+	query := fmt.Sprintf(
 		`SELECT id, sender, recipient, timestamp, content
-		FROM chat.messages
+		FROM %s.%s
 		WHERE user = ?
 		ORDER BY timestamp DESC`,
+		s.dbKeyspace,
+		s.tableName,
+	)
+	iter := cassandra.Session.Query(
+		query,
 		username,
 	).Iter()
 	var message models.Message
