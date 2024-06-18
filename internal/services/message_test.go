@@ -2,61 +2,113 @@ package services
 
 import (
 	"chat-system/internal/models"
-	"chat-system/mocks"
 	"testing"
 	"time"
 
 	"github.com/gocql/gocql"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
 
-// Unit tests
-
-type MessageUnitTestSuite struct {
+type MessagesTestSuite struct {
 	suite.Suite
-	msgService *mocks.MessageService
+	dbSession *gocql.Session
+	tableName string
+	service   *messageService
 }
 
-func TestMessageUnitTestSuite(t *testing.T) {
-	suite.Run(t, new(MessageUnitTestSuite))
+func (mts *MessagesTestSuite) DBSession() *gocql.Session {
+	return mts.dbSession
 }
 
-func (uts *MessageUnitTestSuite) SetupTest() {
-	uts.msgService = new(mocks.MessageService)
+func (mts *MessagesTestSuite) SetDBSession(session *gocql.Session) {
+	mts.dbSession = session
 }
 
-func (uts *MessageUnitTestSuite) TestCreateMessage() {
-	uts.msgService.On("CreateMessage", mock.Anything).Return(nil)
+func (mts *MessagesTestSuite) DBTable() string {
+	return mts.tableName
+}
 
+func (mts *MessagesTestSuite) SetDBTable(tableName string) {
+	mts.tableName = tableName
+}
+
+func (mts *MessagesTestSuite) Service() *messageService {
+	return mts.service
+}
+
+func (mts *MessagesTestSuite) SetService(service *messageService) {
+	mts.service = service
+}
+
+func TestMessagesTestSuite(t *testing.T) {
+	suite.Run(t, new(MessagesTestSuite))
+}
+
+func (mts *MessagesTestSuite) SetupSuite() {
+	mts.SetDBTable(MSGS_TEST_TABLE_NAME)
+	mts.SetDBSession(setupDatabase(mts))
+
+	mts.SetService(NewMessageService(mts.DBSession(), KEYSPACE_TEST, mts.DBTable()))
+}
+
+func (mts *MessagesTestSuite) TearDownSuite() {
+	tearDownDatabase(mts)
+}
+
+func (mts *MessagesTestSuite) TestCreateMessage_Success() {
 	msg := &models.Message{
-		Sender:    "a",
-		Recipient: "b",
-		Content:   "This is a content",
-	}
-
-	err := uts.msgService.CreateMessage(msg)
-
-	uts.Nil(err)
-}
-
-func (uts *MessageUnitTestSuite) TestGetMessages() {
-	testUsername := "test"
-	testMsg := models.Message{
 		ID:        gocql.TimeUUID(),
 		Sender:    "a",
 		Recipient: "b",
 		Timestamp: time.Now(),
-		Content:   "This is a test content.",
+		Content:   "test",
 	}
-	expectedMsgs := []models.Message{}
-	expectedMsgs = append(expectedMsgs, testMsg)
 
-	uts.msgService.On("GetMessages", mock.Anything).Return(expectedMsgs, nil)
+	err := mts.Service().CreateMessage(msg)
 
-	actual, err := uts.msgService.GetMessages(testUsername)
+	mts.Nil(err)
 
-	uts.Nil(err)
-	uts.Equal(expectedMsgs, actual)
-	uts.Contains(expectedMsgs, actual[0])
+	cleanTable(mts)
+}
+
+func (mts *MessagesTestSuite) TestCreateMessage_ErrDB() {
+	errMsg := "Key may not be empty"
+
+	err := mts.Service().CreateMessage(&models.Message{})
+
+	mts.EqualError(err, errMsg)
+}
+
+func (mts *MessagesTestSuite) TestGetMessages_Success() {
+	cleanTable(mts)
+
+	seedTable(mts)
+
+	testUsername := "user1"
+	actual, err := mts.Service().GetMessages(testUsername)
+
+	mts.Nil(err)
+	mts.NotEmpty(actual)
+	mts.Len(actual, 1)
+	mts.Equal(actual[0].Content, "test content")
+
+	cleanTable(mts)
+}
+
+func (mts *MessagesTestSuite) TestGetMessages_Empty() {
+	testUsername := "test-non-exist"
+
+	actual, err := mts.Service().GetMessages(testUsername)
+
+	mts.Nil(err)
+	mts.Empty(actual)
+}
+
+func (mts *MessagesTestSuite) TestGetMessages_ErrDB() {
+	errMsg := "Key may not be empty"
+
+	actual, err := mts.Service().GetMessages("")
+
+	mts.EqualError(err, errMsg)
+	mts.Nil(actual)
 }

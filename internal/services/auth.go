@@ -1,9 +1,10 @@
 package services
 
 import (
-	"chat-system/internal/db"
+	"chat-system/internal/cassandra"
 	"chat-system/internal/models"
 	"errors"
+	"fmt"
 
 	"github.com/gocql/gocql"
 	"golang.org/x/crypto/bcrypt"
@@ -15,15 +16,30 @@ type UserService interface {
 	GetUserByCreds(credentials models.LoginInput) (*models.User, error)
 }
 
-type userService struct{}
+type userService struct {
+	db         *gocql.Session
+	dbKeyspace string
+	tableName  string
+}
 
-func NewUserService() *userService {
-	return &userService{}
+func NewUserService(db *gocql.Session, keyspace, tableName string) *userService {
+	return &userService{
+		db:         db,
+		dbKeyspace: keyspace,
+		tableName:  tableName,
+	}
 }
 
 func (s *userService) GetUserByCreds(credentials models.LoginInput) (*models.User, error) {
 	var existingUser models.User
-	err := db.Session.Query(`SELECT id, username, password FROM users WHERE username = ? LIMIT 1`, credentials.Username).
+
+	query := fmt.Sprintf(
+		`SELECT id, username, password FROM %s.%s WHERE username = ? LIMIT 1`,
+		s.dbKeyspace,
+		s.tableName,
+	)
+
+	err := cassandra.Session.Query(query, credentials.Username).
 		Scan(&existingUser.ID, &existingUser.Username, &existingUser.Password)
 
 	if err != nil {
@@ -39,7 +55,14 @@ func (s *userService) GetUserByCreds(credentials models.LoginInput) (*models.Use
 
 func (s *userService) UserExists(username string) (bool, error) {
 	var existingUserId gocql.UUID
-	err := db.Session.Query(`SELECT id FROM users WHERE username = ? LIMIT 1`, username).Scan(&existingUserId)
+
+	query := fmt.Sprintf(
+		`SELECT id FROM %s.%s WHERE username = ? LIMIT 1`,
+		s.dbKeyspace,
+		s.tableName,
+	)
+
+	err := cassandra.Session.Query(query, username).Scan(&existingUserId)
 
 	if err == nil {
 		return true, nil
@@ -64,8 +87,14 @@ func (s *userService) CreateUser(userInput *models.RegisterInput) (*models.User,
 		Password: hashedPassword,
 	}
 
-	err = db.Session.Query(
-		`INSERT INTO users (id, username, password) VALUES (?, ?, ?)`,
+	query := fmt.Sprintf(
+		`INSERT INTO %s.%s (id, username, password) VALUES (?, ?, ?)`,
+		s.dbKeyspace,
+		s.tableName,
+	)
+
+	err = cassandra.Session.Query(
+		query,
 		user.ID, user.Username, user.Password,
 	).Exec()
 

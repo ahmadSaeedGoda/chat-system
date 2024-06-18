@@ -5,6 +5,7 @@ import (
 	"chat-system/internal/api/common/utils"
 	"chat-system/internal/api/middlewares"
 	"chat-system/internal/api/validators"
+	dbmanager "chat-system/internal/db_manager"
 	"chat-system/internal/models"
 	"chat-system/internal/services"
 	"encoding/json"
@@ -14,7 +15,7 @@ import (
 
 const CACHE_KEY_SUFFIX = "-messages"
 
-var msgService = services.NewMessageService()
+var msgService = services.NewMessageService(dbmanager.CassandraSession, dbmanager.CASSANDRA_KEYSPACE, "messages")
 
 func SendMessage(w http.ResponseWriter, r *http.Request) {
 	var input models.SendMessageInput
