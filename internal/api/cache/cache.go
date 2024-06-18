@@ -3,13 +3,12 @@ package cache
 import (
 	"context"
 	"log"
-	"time"
 
 	"github.com/go-redis/redis/v8"
 )
 
 const (
-	DURATION = 30 * time.Second
+	DURATION = 0 //30 * time.Second
 	DB       = 1
 )
 
