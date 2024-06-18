@@ -1,7 +1,6 @@
 package services
 
 import (
-	"chat-system/internal/cassandra"
 	"chat-system/internal/models"
 	"errors"
 	"fmt"
@@ -39,7 +38,7 @@ func (s *userService) GetUserByCreds(credentials models.LoginInput) (*models.Use
 		s.tableName,
 	)
 
-	err := cassandra.Session.Query(query, credentials.Username).
+	err := s.db.Query(query, credentials.Username).
 		Scan(&existingUser.ID, &existingUser.Username, &existingUser.Password)
 
 	if err != nil {
@@ -62,7 +61,7 @@ func (s *userService) UserExists(username string) (bool, error) {
 		s.tableName,
 	)
 
-	err := cassandra.Session.Query(query, username).Scan(&existingUserId)
+	err := s.db.Query(query, username).Scan(&existingUserId)
 
 	if err == nil {
 		return true, nil
@@ -93,7 +92,7 @@ func (s *userService) CreateUser(userInput *models.RegisterInput) (*models.User,
 		s.tableName,
 	)
 
-	err = cassandra.Session.Query(
+	err = s.db.Query(
 		query,
 		user.ID, user.Username, user.Password,
 	).Exec()

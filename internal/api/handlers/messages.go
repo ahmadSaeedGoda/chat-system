@@ -10,14 +10,28 @@ import (
 	"chat-system/internal/services"
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 )
 
 const CACHE_KEY_SUFFIX = "-messages"
 
-var msgService = services.NewMessageService(dbmanager.CassandraSession, dbmanager.CASSANDRA_KEYSPACE, "messages")
+type MsgHandler interface {
+	SendMessage(w http.ResponseWriter, r *http.Request)
+	GetMessages(w http.ResponseWriter, r *http.Request)
+}
 
-func SendMessage(w http.ResponseWriter, r *http.Request) {
+type msgHandler struct {
+	service services.MessageService
+}
+
+func NewMsgHandler(msgService services.MessageService) *msgHandler {
+	return &msgHandler{
+		service: msgService,
+	}
+}
+
+func (s *msgHandler) SendMessage(w http.ResponseWriter, r *http.Request) {
 	var input models.SendMessageInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		panic(middlewares.NewHTTPError(http.StatusBadRequest, errors.New(common.BAD_REQUEST)))
@@ -27,8 +41,11 @@ func SendMessage(w http.ResponseWriter, r *http.Request) {
 		panic(middlewares.NewHTTPError(http.StatusBadRequest, errors.New(common.BAD_REQUEST)))
 	}
 
+	userService := services.NewUserService(dbmanager.CassandraSession, dbmanager.CASSANDRA_KEYSPACE, "users")
+
 	exists, err := userService.UserExists(input.Recipient)
 	if err != nil {
+		log.Println("here")
 		panic(err)
 	}
 	if !exists {
@@ -42,14 +59,14 @@ func SendMessage(w http.ResponseWriter, r *http.Request) {
 		Recipient: input.Recipient,
 		Content:   input.Content,
 	}
-	if err := msgService.CreateMessage(msg); err != nil {
+	if err := s.service.CreateMessage(msg); err != nil {
 		panic(err)
 	}
 
 	cacheKey := userClaims.Username + CACHE_KEY_SUFFIX
 
 	// Append the message to the Redis list
-	messages, err := msgService.GetFromCache(cacheKey)
+	messages, err := s.service.GetFromCache(cacheKey)
 	if err != nil {
 		panic(err)
 	}
@@ -57,7 +74,7 @@ func SendMessage(w http.ResponseWriter, r *http.Request) {
 	messages = append(messages, *msg)
 
 	// Set the updated messages list in Redis
-	err = msgService.SetMessagesToCache(cacheKey, messages)
+	err = s.service.SetMessagesToCache(cacheKey, messages)
 	if err != nil {
 		panic(err)
 	}
@@ -68,7 +85,7 @@ func SendMessage(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetMessages retrieves all messages for the authenticated user
-func GetMessages(w http.ResponseWriter, r *http.Request) {
+func (s *msgHandler) GetMessages(w http.ResponseWriter, r *http.Request) {
 	var (
 		messages       []models.Message
 		err            error
@@ -80,18 +97,18 @@ func GetMessages(w http.ResponseWriter, r *http.Request) {
 	page, pageSize = utils.GetPaginationParams(r)
 
 	cacheKey := username + CACHE_KEY_SUFFIX
-	messages, err = msgService.GetFromCache(cacheKey)
+	messages, err = s.service.GetFromCache(cacheKey)
 	if err != nil {
 		panic(err)
 	}
 
 	if messages == nil {
-		messages, err = msgService.GetMessages(username)
+		messages, err = s.service.GetMessages(username)
 		if err != nil {
 			panic(err)
 		}
 
-		err = msgService.SetMessagesToCache(cacheKey, messages)
+		err = s.service.SetMessagesToCache(cacheKey, messages)
 		if err != nil {
 			panic(err)
 		}
