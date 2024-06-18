@@ -35,5 +35,10 @@ func (a *appConfig) GetMsgHandler() handlers.MsgHandler {
 			dbmanager.CASSANDRA_KEYSPACE,
 			dbmanager.MSGS_TABLE,
 		),
+		services.NewUserService(
+			dbmanager.CassandraSession,
+			dbmanager.CASSANDRA_KEYSPACE,
+			dbmanager.USERS_TABLE,
+		),
 	)
 }
