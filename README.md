@@ -64,13 +64,13 @@ Set your own for security measures and best practices.
 
     Run the following command in CLI pointing to the project root. So, you can get your database schema created:<br>
     ```bash
-    $ migrate -path internal/db/migrations -database cassandra://cassandra:cassandra@localhost:9042/chat up
+    migrate -path internal/cassandra/migrations -database cassandra://cassandra:cassandra@localhost:9042/chat up
     ```
-    <br>In case you encounter a db dirty state, just connect to Cassandra via any client to drop/remove all tables including the `schema_migrations` table under the `chat` keyspace.
+    <br>In case you encounter a db dirty state, just connect to Cassandra via any client to drop/remove all tables including the `schema_migrations` table under the `chat` keyspace. Or be a good citizen and force to the correct version instead. Then re-apply the migration direction desired!
 
     <br>I believe you know how to clear all db entries and drop the schema all at once:
     ```bash
-    $ migrate -path internal/db/migrations -database cassandra://cassandra:cassandra@localhost:9042/chat down
+    migrate -path internal/cassandra/migrations -database cassandra://cassandra:cassandra@localhost:9042/chat down
     ```
     Visiting [migrate's docs]([URL](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate#usage)) is both helpful & recommended as usual.<br>
 
