@@ -6,7 +6,6 @@ import (
 	"chat-system/internal/api/middlewares"
 	"chat-system/internal/api/transformers"
 	"chat-system/internal/api/validators"
-	dbmanager "chat-system/internal/db_manager"
 	"chat-system/internal/models"
 	"chat-system/internal/services"
 	"encoding/json"
@@ -15,14 +14,22 @@ import (
 	"net/http"
 )
 
-var userService = services.NewUserService(dbmanager.CassandraSession, dbmanager.CASSANDRA_KEYSPACE, "users")
-
 type AuthHandler interface {
 	Register(w http.ResponseWriter, r *http.Request)
 	Login(w http.ResponseWriter, r *http.Request)
 }
 
-func Register(w http.ResponseWriter, r *http.Request) {
+type userHandler struct {
+	service services.UserService
+}
+
+func NewUserHandler(userService services.UserService) *userHandler {
+	return &userHandler{
+		service: userService,
+	}
+}
+
+func (s *userHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var input models.RegisterInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		panic(middlewares.NewHTTPError(http.StatusBadRequest, errors.New(common.BAD_REQUEST)))
@@ -32,7 +39,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		panic(middlewares.NewHTTPError(http.StatusBadRequest, err))
 	}
 
-	exists, err := userService.UserExists(input.Username)
+	exists, err := s.service.UserExists(input.Username)
 	if err != nil {
 		panic(err)
 	}
@@ -40,7 +47,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		panic(middlewares.NewHTTPError(http.StatusConflict, errors.New(common.REGISTER_USER_EXISTS)))
 	}
 
-	user, err := userService.CreateUser(&input)
+	user, err := s.service.CreateUser(&input)
 	if err != nil {
 		panic(err)
 	}
@@ -50,14 +57,14 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(transformers.TransUserToUserResponse(*user))
 }
 
-func Login(w http.ResponseWriter, r *http.Request) {
+func (s *userHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var credentials models.LoginInput
 	err := json.NewDecoder(r.Body).Decode(&credentials)
 	if err != nil {
 		panic(middlewares.NewHTTPError(http.StatusBadRequest, errors.New(common.BAD_REQUEST)))
 	}
 
-	user, err := userService.GetUserByCreds(credentials)
+	user, err := s.service.GetUserByCreds(credentials)
 
 	if err != nil {
 		log.Printf("An unexpected error occurred: %v", err)

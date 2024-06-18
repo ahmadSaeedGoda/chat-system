@@ -14,6 +14,8 @@ import (
 )
 
 const CASSANDRA_KEYSPACE = "chat"
+const USERS_TABLE = "users"
+const MSGS_TABLE = "messages"
 
 var CassandraSession *gocql.Session
 
