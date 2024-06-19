@@ -137,6 +137,12 @@ func (s *messageService) UpdateCachedMsgsForUser(cacheKey string, msg models.Mes
 		return err
 	}
 
+	// if messages are not cached, we cannot update the cache now
+	// return early, fail fast and wait for messages to be available in cache to update them!
+	if messages == nil {
+		return nil
+	}
+
 	// Prepend to cached since they are already sorted by DB
 	messages = append([]models.Message{msg}, messages...)
 	err = s.SetMessagesToCache(cacheKey, messages)

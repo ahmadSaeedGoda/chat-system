@@ -109,6 +109,24 @@ func (_m *MessageService) SetMessagesToCache(cacheKey string, messages []models.
 	return r0
 }
 
+// UpdateCachedMsgsForUser provides a mock function with given fields: cacheKey, msg
+func (_m *MessageService) UpdateCachedMsgsForUser(cacheKey string, msg models.Message) error {
+	ret := _m.Called(cacheKey, msg)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateCachedMsgsForUser")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string, models.Message) error); ok {
+		r0 = rf(cacheKey, msg)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // NewMessageService creates a new instance of MessageService. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMessageService(t interface {
