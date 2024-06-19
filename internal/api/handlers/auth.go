@@ -29,17 +29,17 @@ func NewUserHandler(userService services.UserService) *userHandler {
 	}
 }
 
-func (s *userHandler) Register(w http.ResponseWriter, r *http.Request) {
+func (uh *userHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var input models.RegisterInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		panic(middlewares.NewHTTPError(http.StatusBadRequest, errors.New(common.BAD_REQUEST)))
 	}
 
 	if err := validators.ValidateRegisterInput(input); err != nil {
-		panic(middlewares.NewHTTPError(http.StatusBadRequest, err))
+		panic(middlewares.NewHTTPError(http.StatusBadRequest, errors.New(common.BAD_REQUEST)))
 	}
 
-	exists, err := s.service.UserExists(input.Username)
+	exists, err := uh.service.UserExists(input.Username)
 	if err != nil {
 		panic(err)
 	}
@@ -47,24 +47,24 @@ func (s *userHandler) Register(w http.ResponseWriter, r *http.Request) {
 		panic(middlewares.NewHTTPError(http.StatusConflict, errors.New(common.REGISTER_USER_EXISTS)))
 	}
 
-	user, err := s.service.CreateUser(&input)
+	user, err := uh.service.CreateUser(&input)
 	if err != nil {
 		panic(err)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(transformers.TransUserToUserResponse(*user))
+	json.NewEncoder(w).Encode(transformers.TransUserToUserResponse(user))
 }
 
-func (s *userHandler) Login(w http.ResponseWriter, r *http.Request) {
+func (uh *userHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var credentials models.LoginInput
 	err := json.NewDecoder(r.Body).Decode(&credentials)
 	if err != nil {
 		panic(middlewares.NewHTTPError(http.StatusBadRequest, errors.New(common.BAD_REQUEST)))
 	}
 
-	user, err := s.service.GetUserByCreds(credentials)
+	user, err := uh.service.GetUserByCreds(credentials)
 
 	if err != nil {
 		log.Printf("An unexpected error occurred: %v", err)
@@ -80,11 +80,11 @@ func (s *userHandler) Login(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	res := struct {
-		Token string
-		Data  transformers.UserResponse
+		Token string                     `json:"token"`
+		Data  *transformers.UserResponse `json:"data"`
 	}{
 		Token: token,
-		Data:  transformers.TransUserToUserResponse(*user),
+		Data:  transformers.TransUserToUserResponse(user),
 	}
 	json.NewEncoder(w).Encode(res)
 }
