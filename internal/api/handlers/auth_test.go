@@ -155,7 +155,8 @@ func (ats *AuthTestSuite) TestRegister_Username_Taken() {
 	ats.service.On("UserExists", mock.Anything).Return(true, nil).Once()
 
 	testUserName := "user1"
-	registerInput := &models.RegisterInput{Username: testUserName, Password: "123456"}
+	testPassword := "123456"
+	registerInput := &models.RegisterInput{Username: testUserName, Password: testPassword}
 	body, err := json.Marshal(registerInput)
 	ats.NoError(err, "Failed to marshal registerInput")
 
@@ -202,7 +203,8 @@ func (ats *AuthTestSuite) TestRegister_Unexpected_Err() {
 func (ats *AuthTestSuite) TestRegister_Success() {
 	ats.service.On("UserExists", mock.Anything).Return(false, nil).Once()
 
-	testUsername, testPassword := "user1", "123456"
+	testUsername := "user1"
+	testPassword := "123456"
 	expectedUser := &models.User{Username: testUsername, Password: testPassword}
 	ats.service.On("CreateUser", mock.Anything).Return(expectedUser, nil).Once()
 
