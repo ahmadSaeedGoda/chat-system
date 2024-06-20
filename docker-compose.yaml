@@ -98,15 +98,14 @@ services:
     volumes:
       - .:/app # Mount the source code directory into the container for hot reload
     depends_on:
-      cassandra-node1:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - wait-for-it
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      test:
+        ["CMD-SHELL", "curl -f http://localhost:8000/api/v1/health || exit 1"]
       interval: 30s
-      timeout: 10s
-      retries: 3
+      timeout: 600s
+      retries: 20
+      start_period: 40s
     networks:
       - chat-system
       - cassandra-net
@@ -121,5 +120,11 @@ services:
     depends_on:
       chat-service:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost/api/v1/health || exit 1"]
+      interval: 30s
+      timeout: 600s
+      retries: 20
+      start_period: 40s
     networks:
       - chat-system
