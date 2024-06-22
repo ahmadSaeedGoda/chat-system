@@ -2,19 +2,32 @@
   "cSpell.words": [
     "ADDRS",
     "appconfig",
+    "boltdb",
     "consts",
+    "datasources",
     "dbmanager",
     "gocql",
     "godotenv",
     "gojoi",
+    "ingester",
+    "inmemory",
+    "jobname",
     "joho",
     "Keyspace",
+    "kvstore",
+    "lifecycler",
+    "logrus",
+    "logstream",
     "Nowf",
+    "promhttp",
+    "promtail",
+    "sirupsen",
     "softbrewery",
     "stretchr",
     "Subrouter",
     "testflag",
-    "TODOS"
+    "TODOS",
+    "varlogs"
   ],
   "sqltools.connections": [
     {

@@ -3,23 +3,22 @@ networks:
   chat-system:
 
 volumes:
-  cassandra_seed_data_1:
+  cassandra_seed1_data:
   cassandra_node1_data:
-  cassandra_node2_data:
 
 services:
-  cassandra-seed-1:
+  cassandra-seed1:
     image: cassandra:latest
-    container_name: cassandra-seed-1
+    container_name: cassandra-seed1
     ports:
       - "7000:7000" # JMX port
       - "9042:9042" # CQL port
     environment:
       - CASSANDRA_CLUSTER_NAME=chat-app
       - CASSANDRA_LISTEN_ADDRESS=auto
-      - CASSANDRA_BROADCAST_ADDRESS=cassandra-seed-1
+      - CASSANDRA_BROADCAST_ADDRESS=cassandra-seed1
     volumes:
-      - cassandra_seed_data_1:/var/lib/cassandra
+      - cassandra_seed1_data:/var/lib/cassandra
     networks:
       - cassandra-net
     healthcheck:
@@ -37,12 +36,12 @@ services:
     environment:
       - CASSANDRA_CLUSTER_NAME=chat-app
       - CASSANDRA_LISTEN_ADDRESS=auto
-      - CASSANDRA_SEEDS=cassandra-seed-1
+      - CASSANDRA_SEEDS=cassandra-seed1
       - CASSANDRA_BROADCAST_ADDRESS=cassandra-node1
     volumes:
       - cassandra_node1_data:/var/lib/cassandra
     depends_on:
-      - cassandra-seed-1
+      - cassandra-seed1
     networks:
       - cassandra-net
     healthcheck:
@@ -106,6 +105,9 @@ services:
       timeout: 600s
       retries: 20
       start_period: 40s
+    labels:
+      logging: "promtail"
+      logging_jobname: "containerlogs"
     networks:
       - chat-system
       - cassandra-net
@@ -115,6 +117,9 @@ services:
     container_name: nginx
     ports:
       - "80:80"
+    labels:
+      logging: "promtail"
+      logging_jobname: "containerlogs"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
@@ -126,5 +131,51 @@ services:
       timeout: 600s
       retries: 20
       start_period: 40s
+    networks:
+      - chat-system
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./infrastructure/config/prometheus.yaml:/etc/prometheus/prometheus.yaml
+    ports:
+      - "9090:9090"
+    networks:
+      - chat-system
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+    volumes:
+      - ./infrastructure/config/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+    networks:
+      - chat-system
+
+  loki:
+    image: grafana/loki
+    container_name: loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - chat-system
+
+  promtail:
+    image: grafana/promtail
+    container_name: promtail
+    volumes:
+      - ./infrastructure/config/promtail.yaml:/etc/promtail/docker-config.yaml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: -config.file=/etc/promtail/docker-config.yaml
+    depends_on:
+      - loki
     networks:
       - chat-system
