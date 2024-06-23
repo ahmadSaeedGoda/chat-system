@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/go-redis/redis/v8"
@@ -26,7 +27,7 @@ func Init() {
 	if err != nil {
 		log.Printf("cache is not healthy. returned error: %v", err)
 	}
-	log.Printf("cache is healthy and responds with '%s'", pong)
+	fmt.Printf("cache is healthy and responds with '%s'", pong)
 }
 
 func Get(key string) (string, error) {

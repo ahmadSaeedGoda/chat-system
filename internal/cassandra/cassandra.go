@@ -38,7 +38,7 @@ func Init(keyspace string, replicaCount int, clusterAddresses ...string) (*gocql
 		return nil, err
 	}
 
-	log.Printf("Successfully connected to '%s' keyspace. Now you may want to run migrations!", keyspace)
+	fmt.Printf("Successfully connected to '%s' keyspace. Now you may want to run migrations!", keyspace)
 	return Session, nil
 }
 

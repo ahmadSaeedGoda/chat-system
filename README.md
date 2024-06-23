@@ -35,6 +35,7 @@ Set your own for security measures and best practices.
 - Lack of Integration-Testing/E2E tests to verify API functionality. Due to tight deadline in a holiday season.
 - Simple input validation is conducted for the purpose of the demo. Rigorous validation with nicer error handling can be something to consider.
 - No Rate Limiting.
+- Auth is disabled for monitoring tools. Since it's meant for local dev experimentation. Though, it's still safer to activate even on local.
 
 ## How to Build and Run
 
@@ -82,6 +83,13 @@ Set your own for security measures and best practices.
     Remember to register & login to grab the `token` and set its value in the Auth headers of subsequent requests to protected endpoints.<br>
 
 7. For Redis GUI client you can use `Redis Insight` as a good tool, works well on Linux/Ubuntu. Find your as per your respective platform though!<br> Or get savvy & jump right into the CLI mystical world!!
+
+## Monitoring
+* Visit `Grafana` on the configured address `http://localhost:3000/` via browser to stay on top of your game!
+* Choose a data-source from available ones (Prometheus, Loki) and play with it.
+* You can create your own dashboards or even connect to cloud for Grafana's generous free-plan.
+* You still can visit `Prometheus` without Grafana on its configured address `http://localhost:9090/` for raw metrics.
+* Few logs & events are logged on few levels, such as containers, but more are planned to be set soon.
 
 ## How to Test
 First ensure Cassandra DB server is up & running on your localhost.
