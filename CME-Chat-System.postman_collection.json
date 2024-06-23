@@ -2,9 +2,10 @@
 	"info": {
 		"_postman_id": "b7c2f704-ea83-4668-b592-700d7374653c",
 		"name": "CME-Chat-System",
+		"description": "An API collection for a microservice that simulates a simplified chat platform. This platform handles user messages, store them in a distributed database, and ensure efficient retrieval and caching mechanisms.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "8125803",
-		"_collection_link": "https://egysoft.postman.co/workspace/Team-Workspace~27f02eda-6c2a-4083-8b63-3c5eb45431bf/collection/8125803-b7c2f704-ea83-4668-b592-700d7374653c?action=share&source=collection_link&creator=8125803"
+		"_collection_link": "https://egysoft.postman.co/workspace/27f02eda-6c2a-4083-8b63-3c5eb45431bf/collection/8125803-b7c2f704-ea83-4668-b592-700d7374653c?action=share&source=collection_link&creator=8125803"
 	},
 	"item": [
 		{
@@ -12,12 +13,70 @@
 			"item": [
 				{
 					"name": "Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"",
+									"pm.test(\"Response status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response has the required fields - id and username\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData).to.have.property('id');",
+									"    pm.expect(responseData).to.have.property('username');",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response time is less than 1s\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(1000);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Content-Type header is application/json\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Id and username are non-empty strings\", function () {",
+									"  const responseData = pm.response.json();",
+									"  ",
+									"  pm.expect(responseData).to.be.an('object');",
+									"  pm.expect(responseData.id).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Id should not be empty\");",
+									"  pm.expect(responseData.username).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Username should not be empty\");",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
 					"request": {
+						"auth": {
+							"type": "noauth"
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"minnie\",\n    \"password\": \"aaaaaa\"\n}",
+							"raw": "{\n    \"username\": \"minnie\",\n    \"password\": \"Pa$$word\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -34,18 +93,72 @@
 								"auth",
 								"register"
 							]
-						}
+						},
+						"description": "### Register New User\n\nThis endpoint allows you to register a new user. However, Login is still needed to get a token, no automatic login yet.\n\n#### Request Body\n\n- `username`: (string) The username of the new user.\n- `password`: (string) The password of the new user.\n    \n\n#### Response\n\n- Status: 201\n- Content-Type: application/json\n- `id`: (string) The unique identifier of the new user.\n- `username`: (string) The username of the new user."
 					},
 					"response": []
 				},
 				{
 					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"",
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response has a valid Content-Type header of application/json\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response time is within an acceptable range\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(1000);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Data object should have properties 'id' and 'username'\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData.data).to.be.an('object');",
+									"    pm.expect(responseData.data).to.have.property('id');",
+									"    pm.expect(responseData.data).to.have.property('username');",
+									"});",
+									"",
+									"",
+									"pm.test(\"Token is a non-empty string\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData.token).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Token should not be empty\");",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
+						"auth": {
+							"type": "noauth"
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"minnie\",\n    \"password\": \"aaaaaa\"\n}",
+							"raw": "{\n    \"username\": \"mickey\",\n    \"password\": \"Pa$$word\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -62,32 +175,87 @@
 								"auth",
 								"login"
 							]
-						}
+						},
+						"description": "\n### Auth Login\n\nThis endpoint is used to authenticate and obtain a token for accessing protected resources.\n\n#### Request Body\n- `username` (string, required): The username for authentication.\n- `password` (string, required): The password for authentication.\n\n#### Response\nThe response will be a JSON object with the following properties:\n- `token` (string): The authentication token obtained.\n- `data` (object): An object containing the following properties:\n  - `id` (string): The user's ID.\n  - `username` (string): The username of the authenticated user.\n\n#### Response JSON Schema\n```json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"token\": {\n      \"type\": \"string\"\n    },\n    \"data\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"id\": {\n          \"type\": \"string\"\n        },\n        \"username\": {\n          \"type\": \"string\"\n        }\n      },\n      \"required\": [\"id\", \"username\"]\n    }\n  },\n  \"required\": [\"token\", \"data\"]\n}\n```\n\nThe token obtained from this endpoint is valid for 24 hours.\n\n"
 					},
 					"response": []
 				}
-			]
+			],
+			"description": "Auth Requests for traditional register and login with basic username and password."
 		},
 		{
 			"name": "Chat",
 			"item": [
 				{
 					"name": "Messages",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{authToken}}",
-									"type": "string"
-								}
-							]
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"",
+									"pm.test(\"Response status code is 200\", function () {",
+									"  pm.expect(pm.response.code).to.equal(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response time is less than 200ms\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Content-Type header is application/json\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Messages array has the correct structure\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData.messages).to.be.an('array');",
+									"    responseData.messages.forEach(function(message) {",
+									"        pm.expect(message).to.be.an('object');",
+									"        pm.expect(message.id).to.be.a('string');",
+									"        pm.expect(message.sender).to.be.a('string');",
+									"        pm.expect(message.recipient).to.be.a('string');",
+									"        pm.expect(message.timestamp).to.exist;",
+									"        pm.expect(message.content).to.be.a('string');",
+									"    });",
+									"});",
+									"",
+									"",
+									"pm.test(\"Pagination object structure is valid\", function () {",
+									"  const responseData = pm.response.json();",
+									"  ",
+									"  pm.expect(responseData.pagination).to.exist.and.to.be.an('object');",
+									"  pm.expect(responseData.pagination.currentPage).to.exist.and.to.be.a('number');",
+									"  pm.expect(responseData.pagination.pageSize).to.exist.and.to.be.a('number');",
+									"  pm.expect(responseData.pagination.totalMessages).to.exist.and.to.be.a('number');",
+									"  pm.expect(responseData.pagination.totalPages).to.exist.and.to.be.a('number');",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
 						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseURL}}/{{apiURI}}/messages/?page=1",
+							"raw": "{{baseURL}}/{{apiURI}}/messages/",
 							"host": [
 								"{{baseURL}}"
 							],
@@ -99,31 +267,83 @@
 							"query": [
 								{
 									"key": "page",
-									"value": "1"
+									"value": "1",
+									"description": "Current page to fetch.",
+									"disabled": true
+								},
+								{
+									"key": "pageSize",
+									"value": "2",
+									"description": "Number of messages per page.",
+									"disabled": true
 								}
 							]
-						}
+						},
+						"description": "### Fetch all messages\n\nThis endpoint retrieves all messages sent to or received by the authenticated user.\n\n#### Response\n\nThe response will be a JSON object with the following schema:\n\n``` json\n{\n  \"messages\": [\n    {\n      \"id\": \"string\",\n      \"sender\": \"string\",\n      \"recipient\": \"string\",\n      \"timestamp\": \"string\",\n      \"content\": \"string\"\n    }\n  ],\n  \"pagination\": {\n    \"currentPage\": 0,\n    \"pageSize\": 0,\n    \"totalMessages\": 0,\n    \"totalPages\": 0\n  }\n}\n\n ```"
 					},
 					"response": []
 				},
 				{
 					"name": "Send",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{authToken}}",
-									"type": "string"
-								}
-							]
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"",
+									"pm.test(\"Response status code is 201\", function () {",
+									"    pm.expect(pm.response.code).to.equal(201);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response has the required fields - id, sender, recipient, timestamp, and content\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData.id).to.exist;",
+									"    pm.expect(responseData.sender).to.exist;",
+									"    pm.expect(responseData.recipient).to.exist;",
+									"    pm.expect(responseData.timestamp).to.exist;",
+									"    pm.expect(responseData.content).to.exist;",
+									"});",
+									"",
+									"",
+									"pm.test(\"Timestamp is in a valid date format\", function () {",
+									"    const responseData = pm.response.json();",
+									"    ",
+									"    pm.expect(responseData.timestamp).to.match(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{9}Z$/, \"Timestamp should be in valid date format\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Content-Type header is application/json\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response time is less than 500ms\", function () {",
+									"  pm.expect(pm.response.responseTime).to.be.below(500);",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
 						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"recipient\": \"mickey\",\n    \"content\": \"This is test content\"\n}",
+							"raw": "{\n    \"recipient\": \"minnie\",\n    \"content\": \"This is a test content\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -140,15 +360,136 @@
 								"messages",
 								"send"
 							]
-						}
+						},
+						"description": "\n### Send New Message\n\n---\n\n**HTTP Method:** POST\n\n**URL:** `{{baseURL}}/{{apiURI}}/messages/send`\n\n---\n\n#### Description\nSend a new message to an available user.\n\n---\n\n#### Request Body\n- Raw (application/json)\n  - `recipient` (string): The recipient of the message.\n  - `content` (string): The content of the message.\n\n---\n\n#### Response\nThe response of this request is a JSON schema with the following properties:\n\n```json\n{\n  \"id\": \"\",\n  \"sender\": \"\",\n  \"recipient\": \"\",\n  \"timestamp\": \"\",\n  \"content\": \"\"\n}\n```\n\n---\n\n**Response Status:** 201 Created\n\n**Response Content Type:** application/json\n\n"
 					},
 					"response": []
 				}
-			]
+			],
+			"description": "Send new messages and fetch all messages for one user \"authenticated user\"."
 		},
 		{
 			"name": "Health",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"",
+							"pm.test(\"Response status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.equal(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response content type is application/json\", function () {",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"  pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response has the required fields - Status, HeartBeat, and Message\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.Status).to.exist;",
+							"    pm.expect(responseData.HeartBeat).to.exist;",
+							"    pm.expect(responseData.Message).to.exist;",
+							"});",
+							"",
+							"",
+							"pm.test(\"HeartBeat is in a valid format\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.HeartBeat).to.be.a('string').and.to.be.string;",
+							"});",
+							"",
+							"var template = `",
+							"<canvas id=\"healthChart\" height=\"75\"></canvas>",
+							"",
+							"<script src=\"https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js\"></script> ",
+							"",
+							"<script>",
+							"    var ctx = document.getElementById(\"healthChart\");",
+							"",
+							"    var healthChart = new Chart(ctx, {",
+							"        type: \"line\",",
+							"        data: {",
+							"            labels: [\"Status\", \"HeartBeat\", \"Message\"],",
+							"            datasets: [{",
+							"                data: [],",
+							"                ",
+							"                // Change these colours to customize the chart",
+							"                borderColor: \"#003f5c\",",
+							"                backgroundColor: \"transparent\",",
+							"                pointBackgroundColor: \"#003f5c\",",
+							"            }]",
+							"        },",
+							"        options: {",
+							"            legend: { display: false },",
+							"            title: {",
+							"                display: true,",
+							"                text: 'Health Status'",
+							"            },",
+							"            scales: {",
+							"                yAxes: [{",
+							"                    display: true,",
+							"                    scaleLabel: {",
+							"                        display: true,",
+							"                        labelString: 'Value'",
+							"                    }",
+							"                }]",
+							"            }",
+							"        }",
+							"",
+							"    });",
+							"",
+							"    // Access the data passed to pm.visualizer.set() from the JavaScript",
+							"    // code of the Visualizer template",
+							"    pm.getData(function (err, value) {",
+							"        healthChart.data.datasets[0].data = [value.response.Status, value.response.HeartBeat, value.response.Message];",
+							"        healthChart.update();",
+							"    });",
+							"",
+							"</script>`;",
+							"",
+							"function constructVisualizerPayload() {",
+							"    var res = pm.response.json();",
+							"    ",
+							"    var visualizerData = {",
+							"        Status: res.Status,",
+							"        HeartBeat: res.HeartBeat,",
+							"        Message: res.Message",
+							"    };",
+							"",
+							"    return {response: visualizerData};",
+							"}",
+							"",
+							"pm.visualizer.set(template, constructVisualizerPayload());"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
+				"auth": {
+					"type": "noauth"
+				},
 				"method": "GET",
 				"header": [],
 				"url": {
@@ -160,9 +501,101 @@
 						"{{apiURI}}",
 						"health"
 					]
-				}
+				},
+				"description": "\n### Check Service Availability\n\nThere is an HTTP GET request to `{{baseURL}}/{{apiURI}}/health` to check the service availability.\n\n#### Response\nThe response is in JSON format with the following schema:\n```json\n{\n    \"Status\": \"\",\n    \"HeartBeat\": \"\",\n    \"Message\": \"\"\n}\n```\n"
 			},
 			"response": []
+		},
+		{
+			"name": "Metrics",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"",
+							"pm.test(\"Response status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.equal(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response content type is text/plain\", function () {",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"text/plain\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"  pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9090/metrics",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9090",
+					"path": [
+						"metrics"
+					]
+				},
+				"description": "Prometheus System Metrics."
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{authToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
 		}
 	]
 }
