@@ -50,17 +50,17 @@ Set your own for security measures and best practices.
 
     Now you should be good to go.
 
-    Unless you'd like to play a bit with `.air.toml` configurations. Consult the [Air's documentation]([URL](https://github.com/air-verse/air)) for more details/instructions in this regard.
+    Unless you'd like to play a bit with `.air.toml` configurations. Consult the [Air's documentation](https://github.com/air-verse/air "Air Docs") for more details/instructions in this regard.
 
 3. Build:
     ```bash
-    $ docker compose up --build
+    $ docker compose up --build -d
     ```
 4. Ensure all services are up & healthy first.
 5. Migrate the DataStore:<br>
-    Install [golang-migrate/migrate CLI package]([URL](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate)) to use.<br>
+    Install [golang-migrate/migrate CLI package](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate "golang-migrate") to use.<br>
     Better with instructions for the respective OS you have as opposed to the "With Go toolchain" instructions on that page.<br>
-    Additionally, [Docker usage]([URL](https://github.com/golang-migrate/migrate/?tab=readme-ov-file#docker-usage)) can be a breeze!
+    Additionally, [Docker usage](https://github.com/golang-migrate/migrate/?tab=readme-ov-file#docker-usage "golang-migrate/docker") can be a breeze!
 
     Run the following command in CLI pointing to the project root. So, you can get your database schema created:<br>
     ```bash
@@ -72,7 +72,7 @@ Set your own for security measures and best practices.
     ```bash
     migrate -path internal/cassandra/migrations -database cassandra://cassandra:cassandra@localhost:9042/chat down
     ```
-    Visiting [migrate's docs]([URL](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate#usage)) is both helpful & recommended as usual.<br>
+    Visiting [migrate's docs](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate#usage "migrate's docs") is both helpful & recommended as usual.<br>
 
     <b>SQLTools</b> vsCode extension by <b>Matheus Teixeira</b> is a good one for GUI experience.
 
