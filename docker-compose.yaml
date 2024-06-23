@@ -5,6 +5,7 @@ networks:
 volumes:
   cassandra_seed1_data:
   cassandra_node1_data:
+  redis_data:
 
 services:
   cassandra-seed1:
@@ -56,6 +57,8 @@ services:
     container_name: redis
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 30s

@@ -17,7 +17,7 @@ type MessageService interface {
 	GetMessages(username string) ([]models.Message, error)
 	GetFromCache(cacheKey string) ([]models.Message, error)
 	SetMessagesToCache(cacheKey string, messages []models.Message) error
-	UpdateCachedMsgsForUser(cacheKey string, msg models.Message) error
+	UpdateCachedMsgsForUser(cacheKey string, msg *models.Message) error
 }
 
 type messageService struct {
@@ -129,7 +129,7 @@ func (s *messageService) SetMessagesToCache(cacheKey string, messages []models.M
 	return nil
 }
 
-func (s *messageService) UpdateCachedMsgsForUser(cacheKey string, msg models.Message) error {
+func (s *messageService) UpdateCachedMsgsForUser(cacheKey string, msg *models.Message) error {
 	// Append the message to the Redis list
 	// Set the updated messages list in Redis
 	messages, err := s.GetFromCache(cacheKey)
@@ -143,8 +143,9 @@ func (s *messageService) UpdateCachedMsgsForUser(cacheKey string, msg models.Mes
 		return nil
 	}
 
+	msgToCache := *msg
 	// Prepend to cached since they are already sorted by DB
-	messages = append([]models.Message{msg}, messages...)
+	messages = append([]models.Message{msgToCache}, messages...)
 	err = s.SetMessagesToCache(cacheKey, messages)
 	if err != nil {
 		return err

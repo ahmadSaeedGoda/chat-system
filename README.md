@@ -77,6 +77,12 @@ Set your own for security measures and best practices.
 
     <b>SQLTools</b> vsCode extension by <b>Matheus Teixeira</b> is a good one for GUI experience.
 
+    <br>
+    <strong>IMPORTANT NOTE:</strong> You want to <b>Manually Invalidate Cache</b> after some certain events including but not limited to the following list of events:<br>
+    - Bringing DB down or dropping it.<br>
+    - Migrating DB.<br>
+    - Removal of DB Docker volumes.<br>
+    <br>
 6. Access the service at `http://localhost/api/v1/<path>`.<br>
     You can utilize the included `POSTMAN` file with docs and environment setup to import at your end for convenience. "Find them at the root directory of the project in `json` format"
 

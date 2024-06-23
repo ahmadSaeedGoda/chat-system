@@ -62,14 +62,14 @@ func (mh *msgHandler) SendMessage(w http.ResponseWriter, r *http.Request) {
 
 	senderCacheKey := userClaims.Username + CACHE_KEY_SUFFIX
 
-	if err := mh.service.UpdateCachedMsgsForUser(senderCacheKey, *msg); err != nil {
+	if err := mh.service.UpdateCachedMsgsForUser(senderCacheKey, msg); err != nil {
 		panic(err)
 	}
 
 	recipientCacheKey := msg.Recipient + CACHE_KEY_SUFFIX
 
 	// Let's do the same for recipient
-	if err := mh.service.UpdateCachedMsgsForUser(recipientCacheKey, *msg); err != nil {
+	if err := mh.service.UpdateCachedMsgsForUser(recipientCacheKey, msg); err != nil {
 		panic(err)
 	}
 
