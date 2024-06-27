@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"chat-system/internal/api/cache"
 	common "chat-system/internal/api/common/constants"
 	"chat-system/internal/api/common/utils"
 	"chat-system/internal/api/middlewares"
@@ -12,7 +13,10 @@ import (
 	"net/http"
 )
 
-const CACHE_KEY_SUFFIX = "-messages"
+type MessageHandler interface {
+	SendMessage(w http.ResponseWriter, r *http.Request)
+	GetMessage(w http.ResponseWriter, r *http.Request)
+}
 
 type MsgHandler interface {
 	SendMessage(w http.ResponseWriter, r *http.Request)
@@ -60,13 +64,15 @@ func (mh *msgHandler) SendMessage(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	senderCacheKey := userClaims.Username + CACHE_KEY_SUFFIX
+	cacheKeySuffix := cache.CACHE_KEY_SUFFIX
+
+	senderCacheKey := userClaims.Username + cacheKeySuffix
 
 	if err := mh.service.UpdateCachedMsgsForUser(senderCacheKey, msg); err != nil {
 		panic(err)
 	}
 
-	recipientCacheKey := msg.Recipient + CACHE_KEY_SUFFIX
+	recipientCacheKey := msg.Recipient + cacheKeySuffix
 
 	// Let's do the same for recipient
 	if err := mh.service.UpdateCachedMsgsForUser(recipientCacheKey, msg); err != nil {
@@ -90,7 +96,7 @@ func (mh *msgHandler) GetMessages(w http.ResponseWriter, r *http.Request) {
 	username := userClaims.Username
 	page, pageSize = utils.GetPaginationParams(r)
 
-	cacheKey := username + CACHE_KEY_SUFFIX
+	cacheKey := username + cache.CACHE_KEY_SUFFIX
 	messages, err = mh.service.GetFromCache(cacheKey)
 	if err != nil {
 		panic(err)
