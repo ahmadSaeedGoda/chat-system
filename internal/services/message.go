@@ -36,7 +36,7 @@ func NewMessageService(db *gocql.Session, keyspace, tableName string) *messageSe
 
 func (s *messageService) CreateMessage(message *models.Message) error {
 	message.ID = gocql.TimeUUID()
-	message.Timestamp = time.Now()
+	message.Timestamp = time.Now().UTC()
 
 	query := fmt.Sprintf(
 		`INSERT INTO %s.%s

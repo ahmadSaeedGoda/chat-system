@@ -9,8 +9,9 @@ import (
 )
 
 const (
-	DURATION = 0 //30 * time.Second
-	DB       = 1
+	DURATION         = 0 //30 * time.Second
+	DB               = 1
+	CACHE_KEY_SUFFIX = "-messages"
 )
 
 var (
