@@ -64,6 +64,10 @@ func (uh *userHandler) Login(w http.ResponseWriter, r *http.Request) {
 		panic(middlewares.NewHTTPError(http.StatusBadRequest, errors.New(common.BAD_REQUEST)))
 	}
 
+	if err := validators.ValidateLoginInput(credentials); err != nil {
+		panic(middlewares.NewHTTPError(http.StatusBadRequest, errors.New(common.BAD_REQUEST)))
+	}
+
 	user, err := uh.service.GetUserByCreds(credentials)
 
 	if err != nil {

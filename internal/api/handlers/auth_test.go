@@ -224,3 +224,84 @@ func (ats *AuthTestSuite) TestRegister_Success() {
 
 	ats.Equal(testUsername, ur.Username)
 }
+
+func (ats *AuthTestSuite) TestLogin_Invalid_Input() {
+	// Test invalid req body no username
+	testPassword := "123456"
+	invalidBody := &models.LoginInput{Password: testPassword}
+	body, err := json.Marshal(invalidBody)
+	ats.NoError(err, "Failed to marshal loginInput")
+	resp, err := http.Post(ats.server.URL+"/login", "application/json", bytes.NewBuffer(body))
+	ats.NoError(err, "Failed to make POST request")
+
+	ats.Equal(http.StatusBadRequest, resp.StatusCode)
+
+	// Test invalid req body no password
+	testUserName := "user1"
+	invalidBody = &models.LoginInput{Username: testUserName}
+	body, err = json.Marshal(invalidBody)
+	ats.NoError(err, "Failed to marshal loginInput")
+	resp, err = http.Post(ats.server.URL+"/login", "application/json", bytes.NewBuffer(body))
+	ats.NoError(err, "Failed to make POST request")
+
+	ats.Equal(http.StatusBadRequest, resp.StatusCode)
+
+	var response = struct {
+		Error string `json:"error"`
+	}{}
+	err = json.NewDecoder(resp.Body).Decode(&response)
+	ats.NoError(err, "Failed to decode response body")
+
+	ats.Equal(common.BAD_REQUEST, response.Error)
+}
+
+func (ats *AuthTestSuite) TestLogin_Invalid_Login() {
+	expectedErr := errors.New(common.INVALID_LOGIN)
+	ats.service.On("GetUserByCreds", mock.Anything).Return(nil, expectedErr).Once()
+
+	testUserName := "user1"
+	testPassword := "123456"
+	loginInput := &models.LoginInput{Username: testUserName, Password: testPassword}
+	body, err := json.Marshal(loginInput)
+	ats.NoError(err, "Failed to marshal loginInput")
+
+	resp, err := http.Post(ats.server.URL+"/login", "application/json", bytes.NewBuffer(body))
+	ats.NoError(err, "Failed to make POST request")
+	defer resp.Body.Close()
+
+	ats.Equal(http.StatusUnauthorized, resp.StatusCode)
+
+	var response = struct {
+		Error string `json:"error"`
+	}{}
+	err = json.NewDecoder(resp.Body).Decode(&response)
+	ats.NoError(err, "Failed to decode response body")
+
+	ats.Equal(expectedErr.Error(), response.Error)
+}
+
+func (ats *AuthTestSuite) TestLogin_Success() {
+	testUsername := "user1"
+	testPassword := "123456"
+	expectedUser := &models.User{Username: testUsername, Password: testPassword}
+	ats.service.On("GetUserByCreds", mock.Anything).Return(expectedUser, nil).Once()
+
+	loginInput := models.LoginInput{Username: testUsername, Password: testPassword}
+	body, err := json.Marshal(loginInput)
+	ats.NoError(err, "Failed to marshal loginInput")
+
+	resp, err := http.Post(ats.server.URL+"/login", "application/json", bytes.NewBuffer(body))
+	ats.NoError(err, "Failed to make POST request")
+	defer resp.Body.Close()
+
+	ats.Equal(http.StatusOK, resp.StatusCode)
+
+	var res struct {
+		Token string                     `json:"token"`
+		Data  *transformers.UserResponse `json:"data"`
+	}
+	err = json.NewDecoder(resp.Body).Decode(&res)
+	ats.NoError(err, "Failed to decode response body")
+
+	ats.Equal(testUsername, res.Data.Username)
+}

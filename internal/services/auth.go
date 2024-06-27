@@ -1,6 +1,7 @@
 package services
 
 import (
+	common "chat-system/internal/api/common/constants"
 	"chat-system/internal/models"
 	"errors"
 	"fmt"
@@ -42,11 +43,11 @@ func (s *userService) GetUserByCreds(credentials models.LoginInput) (*models.Use
 		Scan(&existingUser.ID, &existingUser.Username, &existingUser.Password)
 
 	if err != nil {
-		return nil, errors.New("invalid login")
+		return nil, errors.New(common.INVALID_LOGIN)
 	}
 
 	if !s.checkPasswordHash(credentials.Password, existingUser.Password) {
-		return nil, errors.New("invalid login")
+		return nil, errors.New(common.INVALID_LOGIN)
 	}
 
 	return &existingUser, err
