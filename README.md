@@ -75,7 +75,10 @@ Set your own for security measures and best practices.
     ```
     Visiting [migrate's docs](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate#usage "migrate's docs") is both helpful & recommended as usual.<br>
 
-    <b>SQLTools</b> vsCode extension by <b>Matheus Teixeira</b> is a good one for GUI experience.
+    <b>SQLTools</b> vsCode extension by <b>Matheus Teixeira</b> is a good one for GUI experience.<br>
+    ![SQLTools](./screenshots/SQLTools.png "SQLTools")
+    <br>
+    <b>[DBeaver](https://dbeaver.io/ "DBeaver")</b> work bench is a good option too, but with PRO access for Apache Cassandra & Redis!
 
     <br>
     <strong>IMPORTANT NOTE:</strong> You want to <b>Manually Invalidate Cache</b> after some certain events including but not limited to the following list of events:<br>
@@ -88,7 +91,12 @@ Set your own for security measures and best practices.
 
     Remember to register & login to grab the `token` and set its value in the Auth headers of subsequent requests to protected endpoints.<br>
 
-7. For Redis GUI client you can use `Redis Insight` as a good tool, works well on Linux/Ubuntu. Find your as per your respective platform though!<br> Or get savvy & jump right into the CLI mystical world!!
+7. For Redis GUI client you can use [Redis Insight](https://redis.io/insight/#insight-form "redis.io") as a good tool, works well on Linux/Ubuntu. Find yours as per your respective platform though!<br> Or get savvy & jump right into the CLI mystical world!!
+<br><br>
+Note: After connecting to `localhost` default port, remember to set the db as `1` instead of the default `db0`. 👇 <br>
+![Redis Insight](./screenshots/redis-insight.png "Redis Insight")
+![Redis DB](./screenshots/redis-db.png "Redis DB")
+<br><br>
 
 ## Monitoring
 * Visit `Grafana` on the configured address `http://localhost:3000/` via browser to stay on top of your game!
@@ -118,6 +126,8 @@ $ go test ./... -v
 ```
 For displaying of every single tiny log to stdout and stay on top of your game and be in control to check what went well and what goes wrong.
 <br><br>
+Note: Default `timeout` is set to 10 minutes. This should be fine in our case.
+<br><br>
 Run:
 ```sh
 $ go test ./...
@@ -136,11 +146,10 @@ Head to `go help test` && `go help testflag` utilities docs for more detailed ti
 
 ## License
 This is a free software distributed under the terms of the `WTFPL` license along with MIT license as dual-licensed, You can choose whatever works for you.<br/><br/>
-Review the attached `License` file within the source code for mor details.
+Review the attached `License` file within the source code for more details.
 
 ## TODOS
 Here's a list of bunch of stuff to be done when time allows!
-- Integrate Prometheus & Grafana for metrics & monitoring.
 - Write integrations test cases to ensure tests cover user registration, login, message sending, and message retrieval.
 
 ## Wanna Contribute?
