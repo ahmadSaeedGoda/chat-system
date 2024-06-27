@@ -6,6 +6,7 @@
     "consts",
     "datasources",
     "dbmanager",
+    "dgrijalva",
     "gocql",
     "godotenv",
     "gojoi",
