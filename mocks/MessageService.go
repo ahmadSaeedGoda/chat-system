@@ -110,7 +110,7 @@ func (_m *MessageService) SetMessagesToCache(cacheKey string, messages []models.
 }
 
 // UpdateCachedMsgsForUser provides a mock function with given fields: cacheKey, msg
-func (_m *MessageService) UpdateCachedMsgsForUser(cacheKey string, msg models.Message) error {
+func (_m *MessageService) UpdateCachedMsgsForUser(cacheKey string, msg *models.Message) error {
 	ret := _m.Called(cacheKey, msg)
 
 	if len(ret) == 0 {
@@ -118,7 +118,7 @@ func (_m *MessageService) UpdateCachedMsgsForUser(cacheKey string, msg models.Me
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, models.Message) error); ok {
+	if rf, ok := ret.Get(0).(func(string, *models.Message) error); ok {
 		r0 = rf(cacheKey, msg)
 	} else {
 		r0 = ret.Error(0)
