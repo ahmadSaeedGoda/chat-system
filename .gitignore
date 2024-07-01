@@ -15,6 +15,7 @@
 tmp/
 
 # Output files
+*.html
 *.out
 *.out.*
 *.test
