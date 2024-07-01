@@ -1,4 +1,7 @@
 # Chat System Microservice
+[![codecov](https://codecov.io/github/ahmadSaeedGoda/chat-system/graph/badge.svg?token=5IVCJ7JM64)](https://codecov.io/github/ahmadSaeedGoda/chat-system)
+<br>
+
 *Assumptions:*
 - Usernames are unique.
 - Data fetching pattern is described similar to popular apps, such as Whatsapp, FB Messenger, Telegram, etc...
