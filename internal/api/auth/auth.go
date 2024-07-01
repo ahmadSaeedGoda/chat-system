@@ -7,6 +7,8 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
+const TokenExpiresAt = 24 * time.Hour
+
 var jwtKey = []byte(os.Getenv("JWT_SECRET_KEY"))
 
 type Claims struct {
@@ -16,7 +18,7 @@ type Claims struct {
 }
 
 func GenerateToken(username string) (string, error) {
-	expirationTime := time.Now().Add(24 * time.Hour)
+	expirationTime := time.Now().Add(TokenExpiresAt)
 	claims := &Claims{
 		Username: username,
 		StandardClaims: jwt.StandardClaims{
