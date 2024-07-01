@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	common "chat-system/internal/api/common/constants"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -46,7 +47,7 @@ func HandleErrors(next http.Handler) http.Handler {
 					log.Printf("An unexpected error occurred: %v", err)
 					w.Header().Set("Content-Type", "application/json")
 					w.WriteHeader(http.StatusInternalServerError)
-					json.NewEncoder(w).Encode(ErrorResponse{Error: "Internal Server Error"})
+					json.NewEncoder(w).Encode(ErrorResponse{Error: common.INTERNAL_SERVER_ERROR})
 				}
 			}
 		}()
