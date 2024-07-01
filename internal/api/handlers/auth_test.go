@@ -176,7 +176,7 @@ func (ats *AuthTestSuite) TestRegister_Username_Taken() {
 }
 
 func (ats *AuthTestSuite) TestRegister_Unexpected_Err() {
-	expectedErr := errors.New("Internal Server Error")
+	expectedErr := errors.New(common.INTERNAL_SERVER_ERROR)
 	ats.service.On("UserExists", mock.Anything).Return(false, expectedErr).Once()
 
 	testUserName := "user1"
