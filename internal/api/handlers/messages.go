@@ -10,6 +10,7 @@ import (
 	"chat-system/internal/services"
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 )
 
@@ -69,14 +70,14 @@ func (mh *msgHandler) SendMessage(w http.ResponseWriter, r *http.Request) {
 	senderCacheKey := userClaims.Username + cacheKeySuffix
 
 	if err := mh.service.UpdateCachedMsgsForUser(senderCacheKey, msg); err != nil {
-		panic(err)
+		log.Printf("Failed to cache new message for sender %v with error: %v", msg, err)
 	}
 
 	recipientCacheKey := msg.Recipient + cacheKeySuffix
 
 	// Let's do the same for recipient
 	if err := mh.service.UpdateCachedMsgsForUser(recipientCacheKey, msg); err != nil {
-		panic(err)
+		log.Printf("Failed to cache new message for recipient %v with error: %v", msg, err)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -99,7 +100,7 @@ func (mh *msgHandler) GetMessages(w http.ResponseWriter, r *http.Request) {
 	cacheKey := username + cache.CACHE_KEY_SUFFIX
 	messages, err = mh.service.GetFromCache(cacheKey)
 	if err != nil {
-		panic(err)
+		log.Printf("Failed to fetch cached messages error: %v", err)
 	}
 
 	if messages == nil {
@@ -110,7 +111,7 @@ func (mh *msgHandler) GetMessages(w http.ResponseWriter, r *http.Request) {
 
 		err = mh.service.SetMessagesToCache(cacheKey, messages)
 		if err != nil {
-			panic(err)
+			log.Printf("Failed to cache messages error: %v", err)
 		}
 	}
 
